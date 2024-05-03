@@ -59,6 +59,8 @@ typedef unsigned __int32 uint32_t;
 #include "util.h"
 #include "pkcs11/pkcs11-display.h"
 
+#define PKCS15TOOL_MAX_SLOTS 64
+
 static const char *app_name = "pkcs15-tool";
 
 static int opt_wait = 0;
@@ -300,9 +302,9 @@ static void print_cert_info(const struct sc_pkcs15_object *obj)
 static int list_certificates(void)
 {
 	int r, i;
-	struct sc_pkcs15_object *objs[32];
+	struct sc_pkcs15_object *objs[PKCS15TOOL_MAX_SLOTS];
 
-	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_CERT_X509, objs, 32);
+	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_CERT_X509, objs, PKCS15TOOL_MAX_SLOTS);
 	if (r < 0) {
 		fprintf(stderr, "Certificate enumeration failed: %s\n", sc_strerror(r));
 		return 1;
@@ -419,12 +421,12 @@ static int read_certificate(void)
 {
 	int r, i, count;
 	struct sc_pkcs15_id id;
-	struct sc_pkcs15_object *objs[32];
+	struct sc_pkcs15_object *objs[PKCS15TOOL_MAX_SLOTS];
 
 	id.len = SC_PKCS15_MAX_ID_SIZE;
 	sc_pkcs15_hex_string_to_id(opt_cert, &id);
 
-	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_CERT_X509, objs, 32);
+	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_CERT_X509, objs, PKCS15TOOL_MAX_SLOTS);
 	if (r < 0) {
 		fprintf(stderr, "Certificate enumeration failed: %s\n", sc_strerror(r));
 		return 1;
@@ -457,10 +459,10 @@ static int read_certificate(void)
 static int read_data_object(void)
 {
 	int r, i, count;
-	struct sc_pkcs15_object *objs[32];
+	struct sc_pkcs15_object *objs[PKCS15TOOL_MAX_SLOTS];
 	struct sc_object_id oid;
 
-	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_DATA_OBJECT, objs, 32);
+	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_DATA_OBJECT, objs, PKCS15TOOL_MAX_SLOTS);
 	if (r < 0) {
 		fprintf(stderr, "Data object enumeration failed: %s\n", sc_strerror(r));
 		return 1;
@@ -508,9 +510,9 @@ static int read_data_object(void)
 static int list_data_objects(void)
 {
 	int r, i, count;
-	struct sc_pkcs15_object *objs[32];
+	struct sc_pkcs15_object *objs[PKCS15TOOL_MAX_SLOTS];
 
-	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_DATA_OBJECT, objs, 32);
+	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_DATA_OBJECT, objs, PKCS15TOOL_MAX_SLOTS);
 	if (r < 0) {
 		fprintf(stderr, "Data object enumeration failed: %s\n", sc_strerror(r));
 		return 1;
@@ -689,9 +691,9 @@ static void print_prkey_info(const struct sc_pkcs15_object *obj)
 static int list_private_keys(void)
 {
 	int r, i;
-	struct sc_pkcs15_object *objs[32];
+	struct sc_pkcs15_object *objs[PKCS15TOOL_MAX_SLOTS];
 
-	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_PRKEY, objs, 32);
+	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_PRKEY, objs, PKCS15TOOL_MAX_SLOTS);
 	if (r < 0) {
 		fprintf(stderr, "Private key enumeration failed: %s\n", sc_strerror(r));
 		return 1;
@@ -770,9 +772,9 @@ static void print_pubkey_info(const struct sc_pkcs15_object *obj)
 static int list_public_keys(void)
 {
 	int r, i;
-	struct sc_pkcs15_object *objs[32];
+	struct sc_pkcs15_object *objs[PKCS15TOOL_MAX_SLOTS];
 
-	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_PUBKEY, objs, 32);
+	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_PUBKEY, objs, PKCS15TOOL_MAX_SLOTS);
 	if (r < 0) {
 		fprintf(stderr, "Public key enumeration failed: %s\n", sc_strerror(r));
 		return 1;
@@ -893,9 +895,9 @@ static void print_skey_info(const struct sc_pkcs15_object *obj)
 static int list_skeys(void)
 {
 	int r, i;
-	struct sc_pkcs15_object *objs[32];
+	struct sc_pkcs15_object *objs[PKCS15TOOL_MAX_SLOTS];
 
-	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_SKEY, objs, 32);
+	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_SKEY, objs, PKCS15TOOL_MAX_SLOTS);
 	if (r < 0) {
 		fprintf(stderr, "Secret key enumeration failed: %s\n", sc_strerror(r));
 		return 1;
@@ -1193,11 +1195,11 @@ fail2:
 static sc_pkcs15_object_t *
 get_pin_info(void)
 {
-	sc_pkcs15_object_t *objs[32], *obj;
+	sc_pkcs15_object_t *objs[PKCS15TOOL_MAX_SLOTS], *obj;
 	int r;
 
 	if (opt_auth_id == NULL) {
-		r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_AUTH_PIN, objs, 32);
+		r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_AUTH_PIN, objs, PKCS15TOOL_MAX_SLOTS);
 		if (r < 0) {
 			fprintf(stderr, "PIN code enumeration failed: %s\n", sc_strerror(r));
 			return NULL;
@@ -1333,10 +1335,10 @@ static int verify_pin(void)
 	int r;
 
 	if (!opt_auth_id)   {
-		struct sc_pkcs15_object *objs[32];
+		struct sc_pkcs15_object *objs[PKCS15TOOL_MAX_SLOTS];
 		int ii;
 
-		r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_AUTH_PIN, objs, 32);
+		r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_AUTH_PIN, objs, PKCS15TOOL_MAX_SLOTS);
 		if (r < 0) {
 			fprintf(stderr, "PIN code enumeration failed: %s\n", sc_strerror(r));
 			return -1;
@@ -1393,10 +1395,10 @@ static int test_session_pin(void)
 	size_t sessionpinlen = sizeof sessionpin;
 
 	if (!opt_auth_id)   {
-		struct sc_pkcs15_object *objs[32];
+		struct sc_pkcs15_object *objs[PKCS15TOOL_MAX_SLOTS];
 		int ii;
 
-		r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_AUTH_PIN, objs, 32);
+		r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_AUTH_PIN, objs, PKCS15TOOL_MAX_SLOTS);
 		if (r < 0) {
 			fprintf(stderr, "PIN code enumeration failed: %s\n", sc_strerror(r));
 			return -1;
@@ -1574,9 +1576,9 @@ static void print_pin_info(const struct sc_pkcs15_object *obj)
 static int list_pins(void)
 {
 	int r, i;
-	struct sc_pkcs15_object *objs[32];
+	struct sc_pkcs15_object *objs[PKCS15TOOL_MAX_SLOTS];
 
-	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_AUTH, objs, 32);
+	r = sc_pkcs15_get_objects(p15card, SC_PKCS15_TYPE_AUTH, objs, PKCS15TOOL_MAX_SLOTS);
 	if (r < 0) {
 		fprintf(stderr, "AUTH objects enumeration failed: %s\n", sc_strerror(r));
 		return 1;
